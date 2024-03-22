@@ -48,9 +48,6 @@ class QKVAttentionLegacy(nn.Module):
         a = torch.einsum("bts,bcs->bct", weight, v)
         return a.reshape(bs, -1, length)
 
-class RelativePositionBias():
-    pass
-
 class AttentionBlock(nn.Module):
     def __init__(
         self,
@@ -75,7 +72,7 @@ class AttentionBlock(nn.Module):
         self.attention = QKVAttentionLegacy(self.num_heads)
         self.proj_out = zero_module(nn.Conv1d(channels, channels, 1))
         if relative_pos_embeddings:
-            self.relative_pos_embeddings = RelativePositionBias()
+            self.relative_pos_embeddings = RelativePositionBias(scale=(channels // self.num_heads) ** .5, causal=False, heads=num_heads, num_buckets=32, max_distance=64)
         else:
             self.relative_pos_embeddings = None
 
